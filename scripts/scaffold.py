@@ -206,6 +206,20 @@ def rewrite_go_module(dest: Path, name: str, changed: list[str]) -> None:
 
 
 SLUG_FILES = {
+    "python": [
+        ".github/workflows/ci.yml",
+        "deploy/namespace.yaml",
+        "deploy/postgres.yaml",
+        "deploy/app.yaml",
+        "deploy/kustomization.yaml",
+    ],
+    "nextjs": [
+        ".github/workflows/ci.yml",
+        "deploy/namespace.yaml",
+        "deploy/postgres.yaml",
+        "deploy/app.yaml",
+        "deploy/kustomization.yaml",
+    ],
     "go": [
         ".github/workflows/ci.yml",
         "deploy/namespace.yaml",

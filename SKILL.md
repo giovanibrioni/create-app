@@ -62,6 +62,7 @@ Só a identidade da app. O slug antigo (`python-template`, `nextjs-template`, ou
 - `AGENTS.md`: a frase `The distribution name is \`{nome}\`.`
 - `app/core/config.py`: defaults de `app_name` e `otel_service_name`
 - `.env.example`: `APP_NAME` e `OTEL_SERVICE_NAME`
+- `deploy/` e `.github/workflows/ci.yml`: o slug `python-template` vira `{nome}`
 
 **Next.js**
 
@@ -70,6 +71,7 @@ Só a identidade da app. O slug antigo (`python-template`, `nextjs-template`, ou
 - `src/app/layout.tsx`: `metadata.title`
 - `src/backend/core/config.ts`: defaults de `APP_NAME` e `OTEL_SERVICE_NAME`
 - `.env.example`: `APP_NAME` e `OTEL_SERVICE_NAME`
+- `deploy/` e `.github/workflows/ci.yml`: o slug `nextjs-template` vira `{nome}`
 
 **Go**
 
