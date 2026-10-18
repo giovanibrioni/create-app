@@ -83,24 +83,29 @@ def replacements(stack: str, name: str) -> dict[str, list[tuple[str, str]]]:
             ],
         }
     if stack == "go":
+        module = f"github.com/pocs-dev-br/{name}"
         return {
             "go.mod": [
-                ('module github.com/giovanibrioni/golang-template', f'module github.com/giovanibrioni/{name}'),
+                ("module github.com/giovanibrioni/golang-template", f"module {module}"),
             ],
             "README.md": [
                 ("# golang-template\n", f"# {name}\n"),
                 (
-                    "Golang template for microservices with Clean Architecture.",
-                    f"{name} is a Golang microservice with Clean Architecture.",
+                    "Small Go HTTP API organized by domain. Shared infrastructure lives in `internal/core`; every other package under `internal/` is a domain. Postgres runs in Docker. The API runs on the host.",
+                    f"{name} is a small Go HTTP API organized by domain. Shared infrastructure lives in `internal/core`; every other package under `internal/` is a domain. Postgres runs in Docker. The API runs on the host.",
                 ),
             ],
-            "config.yaml": [
-                ('app_name: "golang-template"', f'app_name: "{name}"'),
-                ('service_name: "golang-template"', f'service_name: "{name}"'),
+            "internal/core/config/config.go": [
+                (
+                    'AppName:     getenv("APP_NAME", "golang-template")',
+                    f'AppName:     getenv("APP_NAME", "{name}")',
+                ),
+            ],
+            "cmd/api/main.go": [
+                ('tracing.Init(ctx, "golang-template")', f'tracing.Init(ctx, "{name}")'),
             ],
             ".env.example": [
                 ("APP_NAME=golang-template", f"APP_NAME={name}"),
-                ("OTEL_SERVICE_NAME=golang-template", f"OTEL_SERVICE_NAME={name}"),
             ],
         }
     return {
@@ -187,6 +192,44 @@ def fetch_github(repo: str, dest: Path) -> None:
         rsync_tree(clone_dir, dest)
 
 
+def rewrite_go_module(dest: Path, name: str, changed: list[str]) -> None:
+    old = "github.com/giovanibrioni/golang-template"
+    new = f"github.com/pocs-dev-br/{name}"
+    for path in dest.rglob("*.go"):
+        text = path.read_text()
+        if old not in text:
+            continue
+        path.write_text(text.replace(old, new))
+        relative = str(path.relative_to(dest))
+        if relative not in changed:
+            changed.append(relative)
+
+
+SLUG_FILES = {
+    "go": [
+        ".github/workflows/ci.yml",
+        "deploy/namespace.yaml",
+        "deploy/postgres.yaml",
+        "deploy/app.yaml",
+        "deploy/kustomization.yaml",
+    ],
+}
+
+
+def replace_slug_files(dest: Path, stack: str, name: str, changed: list[str]) -> None:
+    slug = TEMPLATES[stack]["slug"]
+    for relative in SLUG_FILES.get(stack, []):
+        path = dest / relative
+        if not path.is_file():
+            raise SystemExit(f"arquivo esperado não existe no template: {relative}")
+        text = path.read_text()
+        if slug not in text:
+            raise SystemExit(f"texto não encontrado em {relative}: {slug!r}")
+        path.write_text(text.replace(slug, name))
+        if relative not in changed:
+            changed.append(relative)
+
+
 def apply_replacements(dest: Path, stack: str, name: str) -> list[str]:
     changed: list[str] = []
     for relative, pairs in replacements(stack, name).items():
@@ -200,6 +243,9 @@ def apply_replacements(dest: Path, stack: str, name: str) -> list[str]:
             text = text.replace(old, new, 1)
         path.write_text(text)
         changed.append(relative)
+    if stack == "go":
+        rewrite_go_module(dest, name, changed)
+    replace_slug_files(dest, stack, name, changed)
     return changed
 
 

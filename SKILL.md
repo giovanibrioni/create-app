@@ -33,6 +33,8 @@ O GitHub é a origem porque o clone traz só o que está commitado, sem `.git` d
 
 O destino é o diretório de trabalho atual quando o usuário está na pasta do projeto novo. Se ele der outro caminho, use esse caminho. A pasta precisa estar vazia ou conter só `.git`.
 
+O projeto nasce para o repositório `pocs-dev-br/<nome>` na organização. O `homelab-infra` continua na conta `giovanibrioni`.
+
 ## Executar
 
 ```bash
@@ -71,10 +73,12 @@ Só a identidade da app. O slug antigo (`python-template`, `nextjs-template`, ou
 
 **Go**
 
-- `go.mod`: `module github.com/giovanibrioni/golang-template` → `module github.com/giovanibrioni/{nome}`
+- `go.mod`: `module github.com/giovanibrioni/golang-template` → `module github.com/pocs-dev-br/{nome}`
 - `README.md`: título e a primeira frase
-- `config.yaml`: `app_name` e `service_name`
-- `.env.example`: `APP_NAME` e `OTEL_SERVICE_NAME`
+- `internal/core/config/config.go`: default de `APP_NAME`
+- `cmd/api/main.go`: `tracing.Init`
+- `.env.example`: `APP_NAME`
+- `deploy/` e `.github/workflows/ci.yml`: o slug `golang-template` vira `{nome}` (namespace, serviço, imagem e o nome no workflow)
 
 ## O que não muda
 
