@@ -266,7 +266,7 @@ def apply_replacements(dest: Path, stack: str, name: str) -> list[str]:
 def ensure_git(dest: Path) -> None:
     if (dest / ".git").exists():
         return
-    subprocess.run(["git", "init"], cwd=dest, check=True)
+    subprocess.run(["git", "init", "-b", "main"], cwd=dest, check=True)
 
 
 def main() -> None:
